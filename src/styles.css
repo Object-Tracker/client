@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+/* Leaflet styles */
+@import "leaflet/dist/leaflet.css";
+
+/* Custom marker styles */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.custom-marker > div {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Leaflet popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 12px 16px;
+}

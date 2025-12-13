@@ -23,6 +23,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "sw-push.js",
+                "input": "src",
+                "output": "/"
               }
             ],
             "styles": [

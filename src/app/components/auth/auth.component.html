@@ -1,0 +1,99 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  @if (isCheckingAuth()) {
+    <div class="text-center">
+      <p class="text-gray-600">Checking authentication...</p>
+    </div>
+  } @else {
+  <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
+      {{ isLogin() ? 'Sign In' : 'Create Account' }}
+    </h1>
+
+    @if (error()) {
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ error() }}
+      </div>
+    }
+
+    @if (isLogin()) {
+      <!-- Login Form -->
+      <form (ngSubmit)="onLogin()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <input
+            type="text"
+            [(ngModel)]="loginUsername"
+            name="username"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your username"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input
+            type="password"
+            [(ngModel)]="loginPassword"
+            name="password"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your password"
+          />
+        </div>
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          {{ isLoading() ? 'Signing in...' : 'Sign In' }}
+        </button>
+      </form>
+    } @else {
+      <!-- Register Form -->
+      <form (ngSubmit)="onRegister()" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <input
+            type="text"
+            [(ngModel)]="registerUsername"
+            name="username"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Choose a username"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input
+            type="email"
+            [(ngModel)]="registerEmail"
+            name="email"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your email"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <input
+            type="password"
+            [(ngModel)]="registerPassword"
+            name="password"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Choose a password"
+          />
+        </div>
+        <button
+          type="submit"
+          [disabled]="isLoading()"
+          class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          {{ isLoading() ? 'Creating account...' : 'Create Account' }}
+        </button>
+      </form>
+    }
+
+    <div class="mt-4 text-center">
+      <button (click)="toggleMode()" class="text-blue-600 hover:text-blue-800 text-sm">
+        {{ isLogin() ? "Don't have an account? Sign up" : 'Already have an account? Sign in' }}
+      </button>
+    </div>
+  </div>
+  }
+</div>
