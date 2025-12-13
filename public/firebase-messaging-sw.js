@@ -4,14 +4,17 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-comp
 
 // Initialize Firebase in service worker
 // These values will be replaced with your actual Firebase config
-firebase.initializeApp({
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
-});
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyDYQDSJCaFOoI0nH7N0-UTAm0LQnWgkjDY',
+  authDomain: 'object-tracker-java.firebaseapp.com',
+  projectId: 'object-tracker-java',
+  storageBucket: 'object-tracker-java.firebasestorage.app',
+  messagingSenderId: '115685954310',
+  appId: '1:115685954310:web:32a2b3e8944f2b6d0cc487',
+};
+
+firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 

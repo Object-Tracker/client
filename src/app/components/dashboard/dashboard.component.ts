@@ -83,7 +83,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.initMap();
         this.loadObjects();
         this.setupWebSocket();
-        this.requestNotificationPermission();
+        this.refreshFcmToken(); // Always refresh FCM token on dashboard load
 
         if (user.geofenceCenterLat && user.geofenceCenterLng) {
           this.geofenceLat = user.geofenceCenterLat;
@@ -406,12 +406,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.notifications.update((n) => n.filter((_, i) => i !== index));
   }
 
-  private async requestNotificationPermission(): Promise<void> {
+  private async refreshFcmToken(): Promise<void> {
+    // Update notification permission status
     if ('Notification' in window) {
       this.notificationPermission.set(Notification.permission);
-      if (Notification.permission === 'granted') {
-        // Already granted, subscribe to Firebase push
-        await this.firebasePushService.subscribeToNotifications();
+    }
+
+    // Always try to refresh FCM token if permission is granted
+    if (Notification.permission === 'granted') {
+      const success = await this.firebasePushService.subscribeToNotifications();
+      if (success) {
+        console.log('FCM token refreshed successfully');
       }
     }
   }

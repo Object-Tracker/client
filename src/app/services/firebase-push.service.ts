@@ -20,6 +20,21 @@ export class FirebasePushService {
     if (!isPlatformBrowser(this.platformId)) return false;
 
     try {
+      // Register service worker first and wait for it to be ready
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('Service worker registered:', registration.scope);
+
+          // Wait for the service worker to be ready
+          await navigator.serviceWorker.ready;
+          console.log('Service worker ready');
+        } catch (swError) {
+          console.error('Service worker registration failed:', swError);
+          return false;
+        }
+      }
+
       // Initialize Firebase
       this.app = initializeApp(environment.firebase);
       this.messaging = getMessaging(this.app);
@@ -34,26 +49,69 @@ export class FirebasePushService {
   async requestPermissionAndGetToken(): Promise<string | null> {
     if (!this.messaging) {
       const initialized = await this.init();
-      if (!initialized) return null;
+      if (!initialized) {
+        console.error('Firebase messaging not initialized');
+        return null;
+      }
     }
 
     try {
       // Request notification permission
       const permission = await Notification.requestPermission();
+      console.log('Notification permission:', permission);
       if (permission !== 'granted') {
         console.log('Notification permission denied');
         return null;
       }
 
-      // Get FCM token
+      // Check if vapidKey is configured
+      if (!environment.firebase.vapidKey) {
+        console.error('VAPID key is not configured! Get it from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates');
+        return null;
+      }
+
+      // Get FCM token with service worker registration
+      console.log('Requesting FCM token with vapidKey...');
+      const swRegistration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      console.log('Using service worker registration:', swRegistration?.scope);
+
+      if (!swRegistration) {
+        console.error('Service worker registration not found');
+        return null;
+      }
+
+      // Wait for the service worker to be active
+      if (swRegistration.installing) {
+        console.log('Waiting for service worker to install...');
+        await new Promise<void>((resolve) => {
+          swRegistration.installing!.addEventListener('statechange', (e) => {
+            if ((e.target as ServiceWorker).state === 'activated') {
+              resolve();
+            }
+          });
+        });
+      }
+
       const token = await getToken(this.messaging!, {
         vapidKey: environment.firebase.vapidKey,
+        serviceWorkerRegistration: swRegistration,
       });
 
-      console.log('FCM Token:', token);
+      if (!token) {
+        console.error('No FCM token received from Firebase');
+        return null;
+      }
+
+      console.log('FCM Token received:', token.substring(0, 20) + '...');
       return token;
-    } catch (error) {
-      console.error('Failed to get FCM token:', error);
+    } catch (error: any) {
+      if (error?.message?.includes('push service')) {
+        console.error(
+          'Push service error. On macOS, ensure notifications are enabled for your browser in System Settings → Notifications → [Your Browser]'
+        );
+      } else {
+        console.error('Failed to get FCM token:', error);
+      }
       return null;
     }
   }
