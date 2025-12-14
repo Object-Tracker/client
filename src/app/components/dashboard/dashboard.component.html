@@ -1,7 +1,7 @@
 <div class="h-screen flex flex-col bg-gray-100">
   <!-- Header -->
   <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold text-gray-800">Object Tracker</h1>
+    <h1 class="text-xl font-bold text-gray-800"></h1>
     <div class="flex items-center gap-4">
       @if (authService.currentUser(); as user) {
       <span class="text-gray-600">{{ user.username }}</span>
@@ -101,48 +101,6 @@
         }
       </div>
 
-      <!-- Simulation Settings -->
-      <div class="p-4 border-b">
-        <h2 class="font-semibold text-gray-800 mb-2">Simulation Settings</h2>
-        <div class="space-y-2">
-          <div>
-            <label class="block text-xs text-gray-600 mb-1">Speed (ms per step)</label>
-            <input
-              type="range"
-              [(ngModel)]="simulationIntervalMs"
-              min="50"
-              max="1000"
-              step="50"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-            <span class="text-xs text-gray-500">{{ simulationIntervalMs }}ms</span>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-600 mb-1">Step size (meters)</label>
-            <input
-              type="range"
-              [(ngModel)]="simulationStepMeters"
-              min="1"
-              max="50"
-              step="1"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-            <span class="text-xs text-gray-500">{{ simulationStepMeters }}m</span>
-          </div>
-          <div>
-            <label class="block text-xs text-gray-600 mb-1">Total steps</label>
-            <input
-              type="range"
-              [(ngModel)]="simulationTotalSteps"
-              min="10"
-              max="100"
-              step="5"
-              class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-            />
-            <span class="text-xs text-gray-500">{{ simulationTotalSteps }} steps</span>
-          </div>
-        </div>
-      </div>
       <!-- Notifications -->
       <div class="flex-1 p-4 overflow-y-auto">
         <div class="flex justify-between items-center mb-2">

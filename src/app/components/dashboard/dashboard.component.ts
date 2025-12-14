@@ -9,6 +9,7 @@ import { LocationService } from '../../services/location.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { FirebasePushService } from '../../services/firebase-push.service';
 import { TrackedObject, TrackedObjectRequest, Notification as AppNotification } from '../../models/user.model';
+import { SIMULATION_CONFIG } from '../../config/simulation.config';
 
 declare const L: any;
 
@@ -40,10 +41,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   geofenceLng = 0;
   geofenceRadius = 500;
 
-  // Simulation settings
-  simulationStepMeters = 10; // meters per step
-  simulationIntervalMs = 200; // milliseconds between steps
-  simulationTotalSteps = 30; // total number of steps
+  // Simulation settings (from config)
+  private readonly simulationConfig = SIMULATION_CONFIG;
 
   // Predefined object types with emojis
   objectPresets = [
@@ -368,7 +367,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     let currentLng = obj.longitude;
 
     const interval = setInterval(() => {
-      if (step >= this.simulationTotalSteps) {
+      if (step >= this.simulationConfig.totalSteps) {
         clearInterval(interval);
         this.isSimulating.set(false);
         return;
@@ -376,7 +375,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
       // Move object step by step in the random direction
       // Convert meters to degrees (approximate)
-      const stepDegrees = this.simulationStepMeters / 111000;
+      const stepDegrees = this.simulationConfig.stepMeters / 111000;
 
       currentLat += stepDegrees * Math.cos(randomAngle);
       currentLng += stepDegrees * Math.sin(randomAngle) / Math.cos(currentLat * Math.PI / 180);
@@ -392,7 +391,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
 
       step++;
-    }, this.simulationIntervalMs);
+    }, this.simulationConfig.intervalMs);
   }
 
   logout(): void {
