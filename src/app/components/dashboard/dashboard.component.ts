@@ -8,7 +8,11 @@ import { ObjectService } from '../../services/object.service';
 import { LocationService } from '../../services/location.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { FirebasePushService } from '../../services/firebase-push.service';
-import { TrackedObject, TrackedObjectRequest, Notification as AppNotification } from '../../models/user.model';
+import {
+  TrackedObject,
+  TrackedObjectRequest,
+  Notification as AppNotification,
+} from '../../models/user.model';
 import { SIMULATION_CONFIG } from '../../config/simulation.config';
 
 declare const L: any;
@@ -34,17 +38,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isSimulating = signal(false);
   notificationPermission = signal<NotificationPermission>('default');
 
-  // Form fields
   newObjectName = '';
   newObjectIcon = '';
   geofenceLat = 0;
   geofenceLng = 0;
   geofenceRadius = 500;
 
-  // Simulation settings (from config)
   private readonly simulationConfig = SIMULATION_CONFIG;
 
-  // Predefined object types with emojis
   objectPresets = [
     { name: 'Keys', icon: '🔑', type: 'KEYS' },
     { name: 'Bicycle', icon: '🚲', type: 'BICYCLE' },
@@ -82,7 +83,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.initMap();
         this.loadObjects();
         this.setupWebSocket();
-        this.refreshFcmToken(); // Always refresh FCM token on dashboard load
+        this.refreshFcmToken();
 
         if (user.geofenceCenterLat && user.geofenceCenterLng) {
           this.geofenceLat = user.geofenceCenterLat;
@@ -104,7 +105,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private async initMap(): Promise<void> {
     const L = await import('leaflet');
 
-    // Default center (can be changed to user's location)
     const defaultLat = 46.77;
     const defaultLng = 23.59;
 
@@ -114,7 +114,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
 
-    // Get user's current location
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -168,11 +167,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private async updateMarkers(objects: TrackedObject[]): Promise<void> {
-    if (!this.map) return; // Guard against map not being initialized
+    if (!this.map) return;
 
     const L = await import('leaflet');
 
-    // Clear old markers
     this.markers.forEach((marker) => this.map.removeLayer(marker));
     this.markers.clear();
 
@@ -191,7 +189,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         const marker = L.marker([obj.latitude, obj.longitude], { icon })
           .addTo(this.map)
-          .bindPopup(`<div style="text-align: center;"><span style="font-size: 24px;">${emoji}</span><br><b>${obj.name}</b><br>${obj.outsideGeofence ? '<span style="color: #ef4444;">Outside safe zone!</span>' : '<span style="color: #22c55e;">Inside safe zone</span>'}</div>`);
+          .bindPopup(
+            `<div style="text-align: center;"><span style="font-size: 24px;">${emoji}</span><br><b>${
+              obj.name
+            }</b><br>${
+              obj.outsideGeofence
+                ? '<span style="color: #ef4444;">Outside safe zone!</span>'
+                : '<span style="color: #22c55e;">Inside safe zone</span>'
+            }</div>`
+          );
 
         this.markers.set(obj.id, marker);
       }
@@ -200,7 +206,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getObjectEmoji(obj: TrackedObject): string {
     if (obj.icon) return obj.icon;
-    // Fallback based on type
     const fallbackIcons: Record<string, string> = {
       KEYS: '🔑',
       BICYCLE: '🚲',
@@ -223,7 +228,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.objects.update((objects) =>
         objects.map((obj) =>
           obj.id === update.objectId
-            ? { ...obj, latitude: update.latitude, longitude: update.longitude, outsideGeofence: update.outsideGeofence }
+            ? {
+                ...obj,
+                latitude: update.latitude,
+                longitude: update.longitude,
+                outsideGeofence: update.outsideGeofence,
+              }
             : obj
         )
       );
@@ -232,9 +242,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     const notificationSub = this.webSocketService.notifications$.subscribe((notification) => {
       this.notifications.update((n) => [notification, ...n].slice(0, 10));
-      // Reload objects to get updated outsideGeofence status
       this.loadObjects();
-      // Show browser push notification
       this.showBrowserNotification(notification);
     });
 
@@ -264,13 +272,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       })
       .subscribe(() => {
         this.selectedObject.set(null);
-        // Reload objects to update the map immediately
         this.loadObjects();
       });
   }
 
   openAddModal(): void {
-    this.selectedObject.set(null); // Clear any selected object first
+    this.selectedObject.set(null);
     this.newObjectName = '';
     this.newObjectIcon = '';
     this.selectedPreset = null;
@@ -359,10 +366,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.isSimulating.set(true);
     let step = 0;
 
-    // Random direction for this simulation
     const randomAngle = Math.random() * 2 * Math.PI;
 
-    // Start from current object position
     let currentLat = obj.latitude;
     let currentLng = obj.longitude;
 
@@ -373,12 +378,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Move object step by step in the random direction
-      // Convert meters to degrees (approximate)
       const stepDegrees = this.simulationConfig.stepMeters / 111000;
 
       currentLat += stepDegrees * Math.cos(randomAngle);
-      currentLng += stepDegrees * Math.sin(randomAngle) / Math.cos(currentLat * Math.PI / 180);
+      currentLng += (stepDegrees * Math.sin(randomAngle)) / Math.cos((currentLat * Math.PI) / 180);
 
       this.locationService
         .updateLocation({
@@ -387,7 +390,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           longitude: currentLng,
         })
         .subscribe(() => {
-          this.loadObjects(); // Update markers after each move
+          this.loadObjects();
         });
 
       step++;
@@ -406,12 +409,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private async refreshFcmToken(): Promise<void> {
-    // Update notification permission status
     if ('Notification' in window) {
       this.notificationPermission.set(Notification.permission);
     }
 
-    // Always try to refresh FCM token if permission is granted
     if (Notification.permission === 'granted') {
       const success = await this.firebasePushService.subscribeToNotifications();
       if (success) {
@@ -440,12 +441,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         requireInteraction: notification.type === 'GEOFENCE_EXIT',
       });
 
-      // Auto-close after 5 seconds for non-critical notifications
       if (notification.type !== 'GEOFENCE_EXIT') {
         setTimeout(() => browserNotification.close(), 5000);
       }
 
-      // Focus window when notification is clicked
       browserNotification.onclick = () => {
         window.focus();
         browserNotification.close();

@@ -16,26 +16,19 @@ export class AuthComponent implements OnInit {
   error = signal('');
   isCheckingAuth = signal(true);
 
-  // Login form
   loginUsername = '';
   loginPassword = '';
 
-  // Register form
   registerUsername = '';
   registerEmail = '';
   registerPassword = '';
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // Check if user is already logged in
     this.authService.checkAuth().subscribe((user) => {
       this.isCheckingAuth.set(false);
       if (user) {
-        // User is already logged in, redirect to dashboard
         this.router.navigate(['/dashboard']);
       }
     });
@@ -55,16 +48,18 @@ export class AuthComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set('');
 
-    this.authService.login({ username: this.loginUsername, password: this.loginPassword }).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.router.navigate(['/dashboard']);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.error.set(err.error?.message || 'Login failed. Please try again.');
-      },
-    });
+    this.authService
+      .login({ username: this.loginUsername, password: this.loginPassword })
+      .subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.isLoading.set(false);
+          this.error.set(err.error?.message || 'Login failed. Please try again.');
+        },
+      });
   }
 
   onRegister(): void {

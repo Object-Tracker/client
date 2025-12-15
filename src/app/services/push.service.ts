@@ -7,7 +7,8 @@ import { HttpClient } from '@angular/common/http';
 })
 export class PushService {
   private readonly apiUrl = 'http://localhost:8081/api/v1';
-  private readonly vapidPublicKey = 'BCeBmScKmAEJQtNCWG_wdgghmxU4xxeTPKQBub4_f32xZF9gkzz6X9OO58T6P7AVtfL1qCC2zixlP1R5dE0ziyA';
+  private readonly vapidPublicKey =
+    'BCeBmScKmAEJQtNCWG_wdgghmxU4xxeTPKQBub4_f32xZF9gkzz6X9OO58T6P7AVtfL1qCC2zixlP1R5dE0ziyA';
   private platformId = inject(PLATFORM_ID);
   private swRegistration: ServiceWorkerRegistration | null = null;
 
@@ -21,11 +22,9 @@ export class PushService {
     }
 
     try {
-      // Register the service worker
       this.swRegistration = await navigator.serviceWorker.register('/sw-push.js');
       console.log('Service Worker registered:', this.swRegistration);
 
-      // Wait for the service worker to be ready
       await navigator.serviceWorker.ready;
       console.log('Service Worker is ready');
     } catch (error) {
@@ -44,12 +43,10 @@ export class PushService {
     }
 
     try {
-      // Check if already subscribed
       let subscription = await this.swRegistration.pushManager.getSubscription();
       console.log('Existing subscription:', subscription);
 
       if (!subscription) {
-        // Subscribe to push
         const applicationServerKey = this.urlBase64ToUint8Array(this.vapidPublicKey);
         console.log('Subscribing with VAPID key...');
         subscription = await this.swRegistration.pushManager.subscribe({
@@ -59,7 +56,6 @@ export class PushService {
         console.log('Push subscription created:', subscription);
       }
 
-      // Send subscription to server
       const subscriptionJson = subscription.toJSON();
       console.log('Sending subscription to server:', subscriptionJson);
 

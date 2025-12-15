@@ -1,9 +1,5 @@
-// Firebase Messaging Service Worker
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
-
-// Initialize Firebase in service worker
-// These values will be replaced with your actual Firebase config
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDYQDSJCaFOoI0nH7N0-UTAm0LQnWgkjDY',
@@ -18,7 +14,6 @@ firebase.initializeApp(firebaseConfig);
 
 const messaging = firebase.messaging();
 
-// Handle background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message:', payload);
 
@@ -36,7 +31,6 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification click
 self.addEventListener('notificationclick', (event) => {
   console.log('[firebase-messaging-sw.js] Notification clicked');
   event.notification.close();

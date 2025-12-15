@@ -20,13 +20,10 @@ export class FirebasePushService {
     if (!isPlatformBrowser(this.platformId)) return false;
 
     try {
-      // Register service worker first and wait for it to be ready
       if ('serviceWorker' in navigator) {
         try {
           const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
           console.log('Service worker registered:', registration.scope);
-
-          // Wait for the service worker to be ready
           await navigator.serviceWorker.ready;
           console.log('Service worker ready');
         } catch (swError) {
@@ -34,8 +31,6 @@ export class FirebasePushService {
           return false;
         }
       }
-
-      // Initialize Firebase
       this.app = initializeApp(environment.firebase);
       this.messaging = getMessaging(this.app);
       console.log('Firebase initialized');
@@ -64,15 +59,17 @@ export class FirebasePushService {
         return null;
       }
 
-      // Check if vapidKey is configured
       if (!environment.firebase.vapidKey) {
-        console.error('VAPID key is not configured! Get it from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates');
+        console.error(
+          'VAPID key is not configured! Get it from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates'
+        );
         return null;
       }
 
-      // Get FCM token with service worker registration
       console.log('Requesting FCM token with vapidKey...');
-      const swRegistration = await navigator.serviceWorker.getRegistration('/firebase-messaging-sw.js');
+      const swRegistration = await navigator.serviceWorker.getRegistration(
+        '/firebase-messaging-sw.js'
+      );
       console.log('Using service worker registration:', swRegistration?.scope);
 
       if (!swRegistration) {
@@ -80,7 +77,6 @@ export class FirebasePushService {
         return null;
       }
 
-      // Wait for the service worker to be active
       if (swRegistration.installing) {
         console.log('Waiting for service worker to install...');
         await new Promise<void>((resolve) => {
@@ -121,18 +117,15 @@ export class FirebasePushService {
     if (!token) return false;
 
     try {
-      // Send token to backend
       await this.http
         .post(`${this.apiUrl}/users/fcm/token`, { token }, { withCredentials: true })
         .toPromise();
 
       console.log('FCM token sent to server');
 
-      // Listen for foreground messages
       if (this.messaging) {
         onMessage(this.messaging, (payload) => {
           console.log('Foreground message received:', payload);
-          // Show notification manually for foreground
           if (payload.notification) {
             new Notification(payload.notification.title || 'Object Tracker', {
               body: payload.notification.body,
